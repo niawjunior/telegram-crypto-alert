@@ -3,7 +3,7 @@ const config = require('./config')
 const token = config.token;
 const axios = require('axios')
 const bot = new TelegramBot(token, {polling: true})
-const img_url = 'https://github.com/niawjunior/telegram-crypto-alert/logo.png'
+const img_url = 'https://github.com/niawjunior/telegram-crypto-alert/blob/master/logo.png?raw=true'
 
 async function main() {
     return await  axios.get(`https://api.coinmarketcap.com/v2/ticker/?convert=THB&limit=10`)
