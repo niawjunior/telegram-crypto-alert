@@ -6,7 +6,7 @@ const axios = require('axios')
 const bot = new TelegramBot(token, {
     polling: true
 })
-const img_url = 'https://github.com/niawjunior/telegram-crypto-alert/blob/master/logo.png?raw=true'
+const img_url = 'https://raw.githubusercontent.com/niawjunior/telegram-crypto-alert/master/logo.png'
 const firebase = require('firebase')
 const firebase_config = config.firebase_config;
 firebase.initializeApp(firebase_config);
