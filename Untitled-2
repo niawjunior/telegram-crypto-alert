@@ -1,0 +1,21 @@
+{
+    "data": [{
+            "message_id": 336,
+            "from": {
+                "id": 352208881,
+                "is_bot": false,
+                "first_name": "pasupol",
+                "username": "niawjunior",
+                "language_code": "en-TH"
+            },
+            "chat": {
+                "id": 352208881,
+                "first_name": "pasupol",
+                "username": "niawjunior",
+                "type": "private"
+            },
+            "date": 1532066328,
+            "text": "ตั้งค่าการแจ้งเตือน"
+        }
+    ]
+}
