@@ -126,7 +126,7 @@ bot.on('message', (msg) => {
                 } else {
                     var icon_percent = '🔺'
                 }
-                return table += `${gen_rank_icon(item.rank)}. ${icon} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
+                return table += `${item.rank}. ${gen_rank_icon(item.rank)} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
             })
             bot.sendMessage(msg.chat.id, `\n ${table} \n`)
         })
