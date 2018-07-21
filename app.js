@@ -20,7 +20,7 @@ bot.onText(/\/start/, (msg) => {
     bot.sendPhoto(msg.chat.id, img_url, {
         caption: "😍😍 ยินดีต้อนรับ 😍😍 \n "
     }).then(() => {
-        var option = {
+        let option = {
             "reply_markup": {
                 "keyboard": [
                     ["เช็คราคา 🔎"],
@@ -50,9 +50,9 @@ bot.on('message', (msg) => {
     let real_input = msg.text.toString().replace(/[^\w\s]/gi, '')
     if(input_name_last === '?') {
         const input_name_upper = (real_input.replace(/\s/g, '')).toUpperCase()
-        var search_name_array = []
-        var search_symbol_array = []
-        var search_coin = []
+        let search_name_array = []
+        let search_symbol_array = []
+        let search_coin = []
         main().then(data => {
             for (let i in data.data.data) {
                 const name = (data.data.data[i].name).toUpperCase()
@@ -80,7 +80,7 @@ bot.on('message', (msg) => {
                         bot.sendMessage(msg.chat.id, `❤️❤️ ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
                     }
                 })
-    
+                
             } else {
                 bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
             }
@@ -92,7 +92,7 @@ bot.on('message', (msg) => {
 bot.on('message', (msg) => {
     const rank = msg.text
     if (rank.toString().indexOf('Top 10 อันดับแรก 🚀') === 0) {
-        var data_rank = []
+        let data_rank = []
         main().then(data => {
             for (let i in data.data.data) {
                 data_rank.push({
@@ -106,25 +106,29 @@ bot.on('message', (msg) => {
         }).then(() => {
             data_rank = _.orderBy(data_rank, ['rank'], ['asc'])
             data_rank.splice(-40)
-            var table = ''
+            let table = ''
             data_rank.map(item => {
-                var price_thb = item.thb
-                var price_usd = item.usd
-                if (item.rank == 1) {
-                    var icon = '🥇'
-                } else if (item.rank == 2) {
-                    var icon = '🥈'
-                } else if (item.rank == 3) {
-                    var icon = '🥉'
-                } else {
-                    var icon = '🎗'
+                let price_thb = item.thb
+                let price_usd = item.usd
+
+                gen_rank_icon=(rank)=> {
+                    if (rank == 1) {
+                        return '🥇'
+                    } else if (rank == 2) {
+                        return '🥈'
+                    } else if (rank == 3) {
+                        return '🥉'
+                    } else {
+                        return '🎗'
+                    }
                 }
+              
                 if (item.percent_change_24h.toString().charAt(0) == '-') {
                     var icon_percent = '🔻'
                 } else {
                     var icon_percent = '🔺'
                 }
-                return table += `${item.rank}. ${icon} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
+                return table += `${gen_rank_icon(item.rank)}. ${icon} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
             })
             bot.sendMessage(msg.chat.id, `\n ${table} \n`)
         })
@@ -143,8 +147,8 @@ bot.on('message', (msg) => {
 
         let coin = (msg.text.toString().replace(/[^\w\s]/gi, '')).toUpperCase()
         main().then((data) => {
-            var coin_name = []
-            var coin_symbol = []
+            let coin_name = []
+            let coin_symbol = []
             for (let i in data.data.data) {
                 const name = (data.data.data[i].name).toUpperCase()
                 const symbol = (data.data.data[i].symbol).toUpperCase()
@@ -176,7 +180,7 @@ bot.on('message', (msg) => {
             telegram_id: msg.from.id,
             status: false
         }).then(() => {
-            bot.sendMessage(msg.chat.id, "\n ยกเลิกรับการแจ้งเตือนแล้ว \n")
+            bot.sendMessage(msg.chat.id, "\n ยกเลิกการแจ้งเตือนแล้ว \n")
             get_profile(msg.from.id)
         })
     }
