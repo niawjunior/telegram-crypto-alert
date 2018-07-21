@@ -74,8 +74,8 @@ bot.on('message', (msg) => {
             if (search_name_array.includes(input_name_upper) === true || search_symbol_array.includes(input_name_upper) === true) {
                 search_coin.map((item) => {
                     if(item.name === input_name_upper || item.symbol === input_name_upper) {
-                        let price_thb = Number(item.thb).toFixed(0)
-                        let price_usd = Number(item.usd).toFixed(2)
+                        let price_thb = item.thb
+                        let price_usd = item.usd
                         let percent_change_24h = item.percent_change_24h
                         bot.sendMessage(msg.chat.id, `❤️❤️ ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
                     }
@@ -108,8 +108,8 @@ bot.on('message', (msg) => {
             data_rank.splice(-40)
             var table = ''
             data_rank.map(item => {
-                var price_thb = Number(item.thb).toFixed(0)
-                var price_usd = Number(item.usd).toFixed(2)
+                var price_thb = item.thb
+                var price_usd = item.usd
                 if (item.rank == 1) {
                     var icon = '🥇'
                 } else if (item.rank == 2) {
