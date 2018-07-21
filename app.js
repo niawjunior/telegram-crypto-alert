@@ -104,7 +104,7 @@ bot.on('message', (msg) => {
             }
         }).then(() => {
             data_rank = _.orderBy(data_rank, ['rank'], ['asc'])
-            data_rank.splice(-40)
+            data_rank.splice(-90)
             let table = ''
             data_rank.map(item => {
                 let price_thb = item.thb
