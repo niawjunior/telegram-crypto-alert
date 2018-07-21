@@ -43,11 +43,13 @@ bot.on('message', (msg) => {
 })
 
 bot.on('message', (msg) => {
-    let input_text = msg.text.toString().replace(/\s/g, '')
-    const input_name_last = input_text.substr(-1)
-    const real_input = msg.toString().replace(/[^\w\s]/gi, '')
+    let input_text = msg.text.toString()
+    if(input_text.includes('?') === true) {
+        var input_name_last = '?'
+    }
+    let real_input = msg.text.toString().replace(/[^\w\s]/gi, '')
     if(input_name_last === '?') {
-        const input_name_upper = (real_input).toUpperCase()
+        const input_name_upper = (real_input.replace(/\s/g, '')).toUpperCase()
         var search_name_array = []
         var search_symbol_array = []
         var search_coin = []
