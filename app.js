@@ -38,28 +38,54 @@ bot.onText(/\/start/, (msg) => {
 bot.on('message', (msg) => {
     const check_price = msg.text
     if (check_price.toString().indexOf('เช็คราคา 🔎') === 0) {
-        bot.sendMessage(msg.chat.id, "พิมพ์ชื่อสกุลเหรียญที่ต้องการตรวจสอบ\n")
+        bot.sendMessage(msg.chat.id, "พิมพ์ชื่อสกุลเหรียญที่ต้องการตรวจสอบ แล้วตามด้วยเครื่องหมาย ? (ยกตัวอย่างเช่น btc? หรือ Bitcoin?)\n")
     }
 })
 
 bot.on('message', (msg) => {
-    const symbol = (msg.text).toUpperCase()
-    const input_name_upper = (msg.text).toUpperCase()
-    main().then(data => {
-        for (let i in data.data.data) {
-            let symbol_upper = data.data.data[i].symbol
-            let name = data.data.data[i].name
-            let name_upper = (data.data.data[i].name).toUpperCase()
-
-            if (symbol == symbol_upper || input_name_upper == name_upper) {
-                let price_thb = data.data.data[i].quotes.THB.price
-                let price_usd = data.data.data[i].quotes.USD.price
+    let input_text = msg.text.toString().replace(/\s/g, '')
+    const input_name_last = input_text.substr(-1)
+    const real_input = input_text.slice(0,-1)
+    if(input_name_last === '?') {
+        const input_name_upper = (real_input).toUpperCase()
+        var search_name_array = []
+        var search_symbol_array = []
+        var search_coin = []
+        main().then(data => {
+            for (let i in data.data.data) {
+                const name = (data.data.data[i].name).toUpperCase()
+                const symbol = (data.data.data[i].symbol).toUpperCase()
+                let thb = data.data.data[i].quotes.THB.price
+                let usd = data.data.data[i].quotes.USD.price
                 let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
-                bot.sendMessage(msg.chat.id, `❤️❤️ ${symbol_upper} (${name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd} \n Change(24) = ${percent_change_24h}%`)
+                search_name_array.push(name)
+                search_symbol_array.push(symbol)
+                search_coin.push({
+                    name: name,
+                    symbol: symbol,
+                    thb: thb,
+                    usd: usd,
+                    percent_change_24h: percent_change_24h
+                })
             }
-        }
-    })
+        }).then(() => {
+            if (search_name_array.includes(input_name_upper) === true || search_symbol_array.includes(input_name_upper) === true) {
+                search_coin.map((item) => {
+                    if(item.name === input_name_upper || item.symbol === input_name_upper) {
+                        let price_thb = Number(item.thb).toFixed(0)
+                        let price_usd = Number(item.usd).toFixed(2)
+                        let percent_change_24h = item.percent_change_24h
+                        bot.sendMessage(msg.chat.id, `❤️❤️ ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                    }
+                })
+    
+            } else {
+                bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
+            }
+        })
+    }
 })
+
 
 bot.on('message', (msg) => {
     const rank = msg.text
