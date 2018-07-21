@@ -2,6 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const config = require('./config')
 const _ = require('lodash')
 const token = config.token;
+const cron = require('node-cron')
 const axios = require('axios')
 const bot = new TelegramBot(token, {
     polling: true
@@ -72,8 +73,8 @@ bot.on('message', (msg) => {
                 data_rank.push({
                     rank: data.data.data[i].rank,
                     name: data.data.data[i].name,
-                    thb: (data.data.data[i].quotes.THB.price).toFixed(0),
-                    usd: (data.data.data[i].quotes.USD.price).toFixed(2),
+                    thb:  data.data.data[i].quotes.THB.price,
+                    usd:  data.data.data[i].quotes.USD.price,
                     percent_change_24h: data.data.data[i].quotes.USD.percent_change_24h
                 })
             }
@@ -82,21 +83,23 @@ bot.on('message', (msg) => {
             data_rank.splice(-40)
             var table = ''
             data_rank.map(item => {
-                if(item.rank == 1) {
+                var price_thb = Number(item.thb).toFixed(0)
+                var price_usd = Number(item.usd).toFixed(2)
+                if (item.rank == 1) {
                     var icon = '🥇'
-                }else if(item.rank == 2) {
+                } else if (item.rank == 2) {
                     var icon = '🥈'
-                }else if(item.rank == 3) {
+                } else if (item.rank == 3) {
                     var icon = '🥉'
                 } else {
                     var icon = '🎗'
                 }
-                if(item.percent_change_24h.toString().charAt(0) == '-') {
+                if (item.percent_change_24h.toString().charAt(0) == '-') {
                     var icon_percent = '🔻'
                 } else {
                     var icon_percent = '🔺'
                 }
-                return table += `${item.rank}. ${icon} ${item.name} THB: ${item.thb} บาท USD: ${item.usd} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
+                return table += `${item.rank}. ${icon} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
             })
             bot.sendMessage(msg.chat.id, `\n ${table} \n`)
         })
@@ -112,7 +115,6 @@ bot.on('message', (msg) => {
             status: true
         }).then(() => {
             bot.sendMessage(msg.chat.id, "\n สมัครรับการแจ้งเตือนแล้ว \n")
-            get_profile(msg.from.id)
         })
     }
 })
@@ -131,19 +133,15 @@ bot.on('message', (msg) => {
     }
 })
 
-
-
-get_profile = (user_id) => {
-    setInterval(() => {
-        firebase.database().ref('Users').child(user_id).once('value', snap => {
-            var telegram_id = snap.key
-            if (snap.val().status === true) {
-                bitcoin().then(data => {
-                    let price_thb = data.data.data.quotes.THB.price
-                    let price_usd = data.data.data.quotes.USD.price
-                    bot.sendMessage(telegram_id, `❤️❤️ BTC (Bitcoin) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์`)
-                })
-            }
+cron.schedule('0 */10 * * * * ' , function(){
+firebase.database().ref('Users').on('child_added', snap => {
+    const id = snap.val().telegram_id
+    if (snap.val().status === true) {
+        bitcoin().then(data => {
+            let price_thb = data.data.data.quotes.THB.price
+            let price_usd = data.data.data.quotes.USD.price
+            bot.sendMessage(id, `❤️❤️ BTC (Bitcoin) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์`)
         })
-    }, 600000)
-}
+    }
+})
+})
