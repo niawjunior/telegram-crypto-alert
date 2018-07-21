@@ -17,9 +17,7 @@ async function main() {
 }
 
 bot.onText(/\/start/, (msg) => {
-    bot.sendPhoto(msg.chat.id, img_url, {
-        caption: "😍😍 ยินดีต้อนรับ 😍😍 \n "
-    }).then(() => {
+    bot.sendMessage(msg.chat.id, "😍😍 welcome 😍😍 \n\n ").then(() => {
         let option = {
             "reply_markup": {
                 "keyboard": [
@@ -80,7 +78,7 @@ bot.on('message', (msg) => {
                         bot.sendMessage(msg.chat.id, `❤️❤️ ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
                     }
                 })
-                
+
             } else {
                 bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
             }
