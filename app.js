@@ -7,7 +7,6 @@ const axios = require('axios')
 const bot = new TelegramBot(token, {
     polling: true
 })
-const img_url = 'https://raw.githubusercontent.com/niawjunior/telegram-crypto-alert/master/welcome.png'
 const firebase = require('firebase')
 const firebase_config = config.firebase_config;
 firebase.initializeApp(firebase_config);
@@ -17,7 +16,7 @@ async function main() {
 }
 
 bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, "😍😍 welcome 😍😍 \n\n ").then(() => {
+    bot.sendMessage(msg.chat.id, "😍😍 Welcome 😍😍 \n\n ").then(() => {
         let option = {
             "reply_markup": {
                 "keyboard": [
@@ -29,7 +28,7 @@ bot.onText(/\/start/, (msg) => {
             }
         }
         user_id = msg.from.id
-        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาของเหรียญสกุลต่างๆ (รองรับ 50 อันดับแรก) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (รองรับ 50 อันดับแรก) \n\n", option)
+        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (รองรับ 50 อันดับแรก) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (รองรับ 50 อันดับแรก) \n\n", option)
     })
 })
 
