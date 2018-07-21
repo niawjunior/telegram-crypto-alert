@@ -12,7 +12,7 @@ const firebase_config = config.firebase_config;
 firebase.initializeApp(firebase_config);
 
 async function main() {
-    return await axios.get(`https://api.coinmarketcap.com/v2/ticker/?convert=THB&limit=50`)
+    return await axios.get(`https://api.coinmarketcap.com/v2/ticker/?convert=THB&limit=100`)
 }
 
 bot.onText(/\/start/, (msg) => {
@@ -28,7 +28,7 @@ bot.onText(/\/start/, (msg) => {
             }
         }
         user_id = msg.from.id
-        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (รองรับ 50 อันดับแรก) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (รองรับ 50 อันดับแรก) \n\n", option)
+        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (Top 100) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (Top 100) \n\n", option)
     })
 })
 
@@ -54,6 +54,7 @@ bot.on('message', (msg) => {
             for (let i in data.data.data) {
                 const name = (data.data.data[i].name).toUpperCase()
                 const symbol = (data.data.data[i].symbol).toUpperCase()
+                const rank = data.data.data[i].rank
                 let thb = data.data.data[i].quotes.THB.price
                 let usd = data.data.data[i].quotes.USD.price
                 let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
@@ -62,6 +63,7 @@ bot.on('message', (msg) => {
                 search_coin.push({
                     name: name,
                     symbol: symbol,
+                    rank: rank,
                     thb: thb,
                     usd: usd,
                     percent_change_24h: percent_change_24h
@@ -74,7 +76,7 @@ bot.on('message', (msg) => {
                         let price_thb = item.thb
                         let price_usd = item.usd
                         let percent_change_24h = item.percent_change_24h
-                        bot.sendMessage(msg.chat.id, `❤️❤️ ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                        bot.sendMessage(msg.chat.id, `❤️❤️ Rank. ${item.rank} ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
                     }
                 })
 
