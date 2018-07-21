@@ -45,7 +45,7 @@ bot.on('message', (msg) => {
 bot.on('message', (msg) => {
     let input_text = msg.text.toString().replace(/\s/g, '')
     const input_name_last = input_text.substr(-1)
-    const real_input = input_text.slice(0,-1)
+    const real_input = msg.toString().replace(/[^\w\s]/gi, '')
     if(input_name_last === '?') {
         const input_name_upper = (real_input).toUpperCase()
         var search_name_array = []
@@ -139,7 +139,7 @@ bot.on('message', (msg) => {
     const input_coin = msg.text
     if (input_coin.toString().charAt(0) === '/' && input_coin.toString().includes('/start') === false) {
 
-        let coin = (msg.text.substr(1)).toUpperCase()
+        let coin = (msg.text.toString().replace(/[^\w\s]/gi, '')).toUpperCase()
         main().then((data) => {
             var coin_name = []
             var coin_symbol = []
