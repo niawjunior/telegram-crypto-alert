@@ -15,9 +15,6 @@ firebase.initializeApp(firebase_config);
 async function main() {
     return await axios.get(`https://api.coinmarketcap.com/v2/ticker/?convert=THB&limit=50`)
 }
-async function bitcoin() {
-    return await axios.get('https://api.coinmarketcap.com/v2/ticker/1/?convert=THB')
-}
 
 bot.onText(/\/start/, (msg) => {
     bot.sendPhoto(msg.chat.id, img_url, {
@@ -34,7 +31,7 @@ bot.onText(/\/start/, (msg) => {
             }
         }
         user_id = msg.from.id
-        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาของเหรียญสกุลต่างๆ (50 อันดับแรก) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (ขณะนี้รองรับเฉพาะสกุลเหรียญ Bitcoin) \n\n", option)
+        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาของเหรียญสกุลต่างๆ (รองรับ 50 อันดับแรก) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (รองรับ 50 อันดับแรก) \n\n", option)
     })
 })
 
@@ -73,8 +70,8 @@ bot.on('message', (msg) => {
                 data_rank.push({
                     rank: data.data.data[i].rank,
                     name: data.data.data[i].name,
-                    thb:  data.data.data[i].quotes.THB.price,
-                    usd:  data.data.data[i].quotes.USD.price,
+                    thb: data.data.data[i].quotes.THB.price,
+                    usd: data.data.data[i].quotes.USD.price,
                     percent_change_24h: data.data.data[i].quotes.USD.percent_change_24h
                 })
             }
@@ -109,19 +106,43 @@ bot.on('message', (msg) => {
 bot.on('message', (msg) => {
     const set_time = msg.text
     if (set_time.toString().indexOf('รับการแจ้งเตือน 💌') === 0) {
-        firebase.database().ref('Users').child(msg.from.id).update({
-            updated_At: Date.now(),
-            telegram_id: msg.from.id,
-            status: true
-        }).then(() => {
-            bot.sendMessage(msg.chat.id, "\n สมัครรับการแจ้งเตือนแล้ว \n")
+        bot.sendMessage(msg.chat.id, "\n พิมพ์เครื่องหมาย / แล้วตามด้วยชื่อเหรียญที่ต้องการ (ยกตัวอย่างเช่น /btc หรือ /Bitcoin) \n")
+    }
+})
+bot.on('message', (msg) => {
+    const input_coin = msg.text
+    if (input_coin.toString().charAt(0) === '/' && input_coin.toString().includes('/start') === false) {
+
+        let coin = (msg.text.substr(1)).toUpperCase()
+        main().then((data) => {
+            var coin_name = []
+            var coin_symbol = []
+            for (let i in data.data.data) {
+                const name = (data.data.data[i].name).toUpperCase()
+                const symbol = (data.data.data[i].symbol).toUpperCase()
+                coin_name.push(name)
+                coin_symbol.push(symbol)
+            }
+
+            if (coin_name.includes(coin) === true || coin_symbol.includes(coin) === true) {
+                firebase.database().ref('Users').child(msg.from.id).update({
+                    updated_At: Date.now(),
+                    telegram_id: msg.from.id,
+                    status: true,
+                    coin: coin
+                }).then(() => {
+                    bot.sendMessage(msg.chat.id, `\n สมัครรับการแจ้งเตือนราคา ${coin} แล้ว 🎉\n`)
+                })
+            } else {
+                bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
+            }
         })
     }
 })
 
 bot.on('message', (msg) => {
-    const set_calcel = msg.text
-    if (set_calcel.toString().indexOf('ยกเลิกการแจ้งเตือน ❌') === 0) {
+    const set_cancel = msg.text
+    if (set_cancel.toString().indexOf('ยกเลิกการแจ้งเตือน ❌') === 0) {
         firebase.database().ref('Users').child(msg.from.id).update({
             updated_At: Date.now(),
             telegram_id: msg.from.id,
@@ -133,15 +154,23 @@ bot.on('message', (msg) => {
     }
 })
 
-cron.schedule('0 */10 * * * * ' , function(){
-firebase.database().ref('Users').on('child_added', snap => {
-    const id = snap.val().telegram_id
-    if (snap.val().status === true) {
-        bitcoin().then(data => {
-            let price_thb = data.data.data.quotes.THB.price
-            let price_usd = data.data.data.quotes.USD.price
-            bot.sendMessage(id, `❤️❤️ BTC (Bitcoin) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์`)
-        })
-    }
-})
+cron.schedule('0 */10 * * * * ', function () {
+    firebase.database().ref('Users').on('child_added', snap => {
+        if (snap.val().status === true) {
+            const id = snap.val().telegram_id
+            const select_coin = snap.val().coin
+            main().then(data => {
+                for (let i in data.data.data) {
+                    const name = (data.data.data[i].name).toUpperCase()
+                    const symbol = (data.data.data[i].symbol).toUpperCase()
+                    if (select_coin === name || select_coin === symbol) {
+                        let price_thb = data.data.data[i].quotes.THB.price
+                        let price_usd = data.data.data[i].quotes.USD.price
+                        let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
+                        bot.sendMessage(id, `🔔 ${symbol} (${name}) 🔔 \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์ \n Change(24) = ${percent_change_24h}%`)
+                    }
+                }
+            })
+        }
+    })
 })
