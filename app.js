@@ -29,7 +29,7 @@ bot.onText(/\/start/, (msg) => {
             }
         }
         user_id = msg.from.id
-        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ คุณสมบัติ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (Top 100) \n 2. เช็คยอดคงเหลือ (Bitcoin, Ethereum) \n 3. Top 10 อันดับแรก \n 4. แจ้งเตือน ทุกๆ 1 ชั่วโมง (Top 100) \n\n", option)
+        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ คุณสมบัติ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (Top 100) \n 2. เช็คยอดคงเหลือ (Bitcoin, Ethereum) \n 3. รายชื่อ Top 10 เหรียญอันดับแรก \n 4. แจ้งเตือน ทุกๆ 1 ชั่วโมง (Top 100) \n\n", option)
 })
 
 bot.on('message', (msg) => {
