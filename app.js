@@ -4,6 +4,7 @@ const _ = require('lodash')
 const token = config.token;
 const cron = require('node-cron')
 const axios = require('axios')
+var WAValidator = require('wallet-address-validator');
 const bot = new TelegramBot(token, {
     polling: true
 })
@@ -16,20 +17,19 @@ async function main() {
 }
 
 bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, "😍😍 Welcome 😍😍 \n\n ").then(() => {
         let option = {
             "reply_markup": {
                 "keyboard": [
                     ["เช็คราคา 🔎"],
                     ["Top 10 อันดับแรก 🚀"],
+                    ["เช็คยอดคงเหลือ 💰"],
                     ["รับการแจ้งเตือน 💌"],
                     ["ยกเลิกการแจ้งเตือน ❌"]
                 ]
             }
         }
         user_id = msg.from.id
-        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ สิ่งที่บอทสามารถทำได้ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (Top 100) \n 2. Top 10 อันดับแรก \n 3. แจ้งเตือน ทุกๆ 10 นาที (Top 100) \n\n", option)
-    })
+        bot.sendMessage(msg.chat.id, "\n⚔️⚔️ คุณสมบัติ ⚔️⚔️\n\n 1. ตรวจสอบราคาสกุลเหรียญต่างๆ (Top 100) \n 2. เช็คยอดคงเหลือ (Bitcoin, Ethereum) \n 3. Top 10 อันดับแรก \n 4. แจ้งเตือน ทุกๆ 1 ชั่วโมง (Top 100) \n\n", option)
 })
 
 bot.on('message', (msg) => {
@@ -38,6 +38,55 @@ bot.on('message', (msg) => {
         bot.sendMessage(msg.chat.id, "พิมพ์ชื่อสกุลเหรียญที่ต้องการตรวจสอบ แล้วตามด้วยเครื่องหมาย ? (ยกตัวอย่างเช่น btc? หรือ Bitcoin?)\n")
     }
 })
+
+
+bot.on('message', (msg) => {
+    const check_balance = msg.text
+    if (check_balance.toString().indexOf('เช็คยอดคงเหลือ 💰') === 0) {
+        bot.sendMessage(msg.chat.id, "พิมพ์ที่อยู่วอลเล็ทที่คุณต้องการตรวจสอบ\n")
+    }
+})
+
+async function check_ethereum_balance (wallet) {
+   return await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${wallet}&tag=latest&apikey=RIV89WHJKBBAS75BWT9QGNUPN8DST95H5P`)
+}
+
+async function check_bitcoin_balance (wallet) {
+    return await axios.get(`https://blockexplorer.com/api/addr/${wallet}/balance`)
+ }
+
+bot.on('message', (msg) => {
+    const check_isAddress = msg.text
+    if(check_wallet(check_isAddress) === 'BTC') {
+        check_bitcoin_balance(check_isAddress).then(data => {
+            var balance = data.data / 100000000
+            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance} BTC\n`)
+        })
+    } else if(check_wallet(check_isAddress) === 'ETH') {
+
+        check_ethereum_balance(check_isAddress).then(data => {
+            var balance = data.data.result / 10e17
+            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance} ETH\n`)
+        })
+    }
+     else {
+        return false;
+    }
+})
+
+// wallet validator
+function check_wallet(address) {
+    var btc = WAValidator.validate(address, 'BTC');
+    var eth = WAValidator.validate(address, 'ETH');
+
+    if(btc) {
+        return "BTC"
+    } else if(eth) {
+        return "ETH"
+    } else {
+        return false
+    }
+}
 
 bot.on('message', (msg) => {
     let input_text = msg.text.toString()
@@ -123,9 +172,9 @@ bot.on('message', (msg) => {
                 }
               
                 if (item.percent_change_24h.toString().charAt(0) == '-') {
-                    var icon_percent = '🔻'
+                    var icon_percent = '👇'
                 } else {
-                    var icon_percent = '🔺'
+                    var icon_percent = '👆'
                 }
                 return table += `${item.rank}. ${gen_rank_icon(item.rank)} ${item.name} THB: ${price_thb.toLocaleString()} บาท USD: ${price_usd.toLocaleString()} ดอลลาร์ Change(24h): ${item.percent_change_24h}% ${icon_percent} \n\n`
             })
@@ -185,7 +234,7 @@ bot.on('message', (msg) => {
     }
 })
 
-cron.schedule('0 */10 * * * * ', function () {
+cron.schedule('0 */60 * * * * ', function () {
     firebase.database().ref('Users').on('child_added', snap => {
         if (snap.val().status === true) {
             const id = snap.val().telegram_id

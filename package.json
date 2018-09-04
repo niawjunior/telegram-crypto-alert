@@ -15,6 +15,7 @@
     "lodash": "^4.17.10",
     "node-cron": "^1.2.1",
     "node-telegram-bot-api": "^0.30.0",
-    "s": "^0.1.1"
+    "s": "^0.1.1",
+    "wallet-address-validator": "^0.1.7"
   }
 }
