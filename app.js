@@ -62,15 +62,12 @@ bot.on('message', (msg) => {
             var balance = data.data / 100000000
             bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance.toFixed(3)} BTC\n`)
         })
-    } else if(check_wallet(check_isAddress) === 'ETH') {
-
+    } 
+    if(check_wallet(check_isAddress) === 'ETH') {
         check_ethereum_balance(check_isAddress).then(data => {
             var balance = data.data.result / 10e17
             bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance.toFixed(3)} ETH\n`)
         })
-    }
-     else {
-        return false;
     }
 })
 
@@ -81,10 +78,9 @@ function check_wallet(address) {
 
     if(btc) {
         return "BTC"
-    } else if(eth) {
+    }
+    if(eth) {
         return "ETH"
-    } else {
-        return false
     }
 }
 
