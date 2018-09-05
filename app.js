@@ -60,13 +60,13 @@ bot.on('message', (msg) => {
     if(check_wallet(check_isAddress) === 'BTC') {
         check_bitcoin_balance(check_isAddress).then(data => {
             var balance = data.data / 100000000
-            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance} BTC\n`)
+            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance.toFixed(3)} BTC\n`)
         })
     } else if(check_wallet(check_isAddress) === 'ETH') {
 
         check_ethereum_balance(check_isAddress).then(data => {
             var balance = data.data.result / 10e17
-            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance} ETH\n`)
+            bot.sendMessage(msg.chat.id, `ยอดคงเหลือ: ${balance.toFixed(3)} ETH\n`)
         })
     }
      else {
