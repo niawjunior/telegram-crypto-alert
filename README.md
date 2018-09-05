@@ -3,4 +3,4 @@
 ### npm install
 ### node app.js
 ![alt text](demo.png)
-## try it >> https://t.me/cryptoTH_alert_bot
+## try it >> http://t.me/crypto_360_bot
