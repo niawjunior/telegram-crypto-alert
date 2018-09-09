@@ -244,7 +244,7 @@ bot.on('message', (msg) => {
     }
 })
 
-cron.schedule('0 */1 * * * * ', function () {
+cron.schedule('0 */60 * * * * ', function () {
     firebase.database().ref('Users').on('child_added', snap => {
         if (snap.val().status === true) {
             const select_coin = snap.val().coin
