@@ -12,8 +12,12 @@ const firebase = require('firebase')
 const firebase_config = config.firebase_config;
 firebase.initializeApp(firebase_config);
 
-async function main() {
+const main = async()=> {
     return await axios.get(`https://api.coinmarketcap.com/v2/ticker/?convert=THB&limit=100`)
+}
+
+const getHydro = async()=> {
+   return await axios.get('https://api.cryptonator.com/api/ticker/hydro-btc')
 }
 
 bot.onText(/\/start/, (msg) => {
@@ -126,7 +130,17 @@ bot.on('message', (msg) => {
                 })
 
             } else {
-                bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
+                if(input_name_upper === 'HYDRO' || input_name_upper === 'hydro') {
+                    getHydro().then(data => {
+                        let price_btc= data.data.ticker.price
+                        let percent_change_24h = data.data.ticker.change
+                        let symbol = data.data.ticker.base
+                        let target = data.data.ticker.target
+                        bot.sendMessage(msg.chat.id, `❤️❤️ ${symbol} ❤️❤️ \n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                    })
+                } else {
+                    bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
+                }
             }
         })
     }
@@ -200,7 +214,7 @@ bot.on('message', (msg) => {
                 coin_symbol.push(symbol)
             }
 
-            if (coin_name.includes(coin) === true || coin_symbol.includes(coin) === true) {
+            if (coin_name.includes(coin) === true || coin_symbol.includes(coin) === true || coin === 'HYDRO') {
                 firebase.database().ref('Users').child(msg.from.id).update({
                     updated_At: Date.now(),
                     telegram_id: msg.from.id,
@@ -230,23 +244,34 @@ bot.on('message', (msg) => {
     }
 })
 
-cron.schedule('0 */60 * * * * ', function () {
+cron.schedule('0 */5 * * * * ', function () {
     firebase.database().ref('Users').on('child_added', snap => {
         if (snap.val().status === true) {
             const id = snap.val().telegram_id
             const select_coin = snap.val().coin
-            main().then(data => {
-                for (let i in data.data.data) {
-                    const name = (data.data.data[i].name).toUpperCase()
-                    const symbol = (data.data.data[i].symbol).toUpperCase()
-                    if (select_coin === name || select_coin === symbol) {
-                        let price_thb = data.data.data[i].quotes.THB.price
-                        let price_usd = data.data.data[i].quotes.USD.price
-                        let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
-                        bot.sendMessage(id, `🔔 ${symbol} (${name}) 🔔 \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์ \n Change(24) = ${percent_change_24h}%`)
+            if(select_coin === 'HYDRO') {
+                getHydro().then(data => {
+                    let price_btc= data.data.ticker.price
+                    let percent_change_24h = data.data.ticker.change
+                    let symbol = data.data.ticker.base
+                    let target = data.data.ticker.target
+
+                    bot.sendMessage(id, `🔔 ${symbol} 🔔\n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                })
+            } else {
+                main().then(data => {
+                    for (let i in data.data.data) {
+                        const name = (data.data.data[i].name).toUpperCase()
+                        const symbol = (data.data.data[i].symbol).toUpperCase()
+                        if (select_coin === name || select_coin === symbol) {
+                            let price_thb = data.data.data[i].quotes.THB.price
+                            let price_usd = data.data.data[i].quotes.USD.price
+                            let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
+                            bot.sendMessage(id, `🔔 ${symbol} (${name}) 🔔 \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์ \n Change(24) = ${percent_change_24h}%`)
+                        }
                     }
-                }
-            })
+                })
+            }
         }
     })
 })
