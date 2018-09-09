@@ -244,19 +244,25 @@ bot.on('message', (msg) => {
     }
 })
 
-cron.schedule('0 */5 * * * * ', function () {
+cron.schedule('0 */1 * * * * ', function () {
     firebase.database().ref('Users').on('child_added', snap => {
         if (snap.val().status === true) {
-            const id = snap.val().telegram_id
             const select_coin = snap.val().coin
+            const id = snap.val().telegram_id
             if(select_coin === 'HYDRO') {
                 getHydro().then(data => {
                     let price_btc= data.data.ticker.price
                     let percent_change_24h = data.data.ticker.change
                     let symbol = data.data.ticker.base
                     let target = data.data.ticker.target
-
-                    bot.sendMessage(id, `🔔 ${symbol} 🔔\n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                    bot.sendMessage(id, `🔔 ${symbol} 🔔\n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`).then(() => {
+                        console.log('success')
+                    })
+                    .catch(() => {
+                        return false;
+                    })
+                }).catch(() => {
+                    console.log('not found')
                 })
             } else {
                 main().then(data => {
@@ -267,9 +273,16 @@ cron.schedule('0 */5 * * * * ', function () {
                             let price_thb = data.data.data[i].quotes.THB.price
                             let price_usd = data.data.data[i].quotes.USD.price
                             let percent_change_24h = data.data.data[i].quotes.USD.percent_change_24h
-                            bot.sendMessage(id, `🔔 ${symbol} (${name}) 🔔 \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์ \n Change(24) = ${percent_change_24h}%`)
+                            bot.sendMessage(id, `🔔 ${symbol} (${name}) 🔔 \n\n THB = ${price_thb.toLocaleString()} บาท \n USD = ${price_usd.toLocaleString()} ดอลลาร์ \n Change(24) = ${percent_change_24h}%`).then(() => {
+                                console.log('success')
+                            })
+                            .catch(() => {
+                                return false
+                            })
                         }
                     }
+                }).catch(() => {
+                    console.log('not found')
                 })
             }
         }
