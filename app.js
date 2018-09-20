@@ -17,7 +17,7 @@ const main = async()=> {
 }
 
 const getHydro = async()=> {
-   return await axios.get('https://api.cryptonator.com/api/ticker/hydro-btc')
+   return await axios.get('https://api.coinmarketcap.com/v2/ticker/2698/?convert=BTC')
 }
 
 bot.onText(/\/start/, (msg) => {
@@ -125,18 +125,17 @@ bot.on('message', (msg) => {
                         let price_thb = item.thb
                         let price_usd = item.usd
                         let percent_change_24h = item.percent_change_24h
-                        bot.sendMessage(msg.chat.id, `❤️❤️ Rank. ${item.rank} ${item.symbol} (${item.name}) ❤️❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                        bot.sendMessage(msg.chat.id, `❤️ Rank. ${item.rank} ${item.symbol} (${item.name}) ❤️ \n\n THB = ${price_thb.toLocaleString()} \n USD = ${price_usd.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
                     }
                 })
 
             } else {
                 if(input_name_upper === 'HYDRO' || input_name_upper === 'hydro') {
                     getHydro().then(data => {
-                        let price_btc= data.data.ticker.price
-                        let percent_change_24h = data.data.ticker.change
-                        let symbol = data.data.ticker.base
-                        let target = data.data.ticker.target
-                        bot.sendMessage(msg.chat.id, `❤️❤️ ${symbol} ❤️❤️ \n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`)
+                        let price_usd = data.data.data.quotes.USD.price
+                        let price_btc= data.data.data.quotes.BTC.price.toFixed(8)
+                        let percent_change_24h = data.data.data.quotes.BTC.percent_change_24h
+                        bot.sendMessage(msg.chat.id, `❤️ Rank. ${data.data.data.rank} ${data.data.data.symbol} (${data.data.data.name}) ❤️ \n\n BTC = ${price_btc} \n USD = ${price_usd} \n Change(24) = ${percent_change_24h}%`)
                     })
                 } else {
                     bot.sendMessage(msg.chat.id, `\n ไม่พบเหรียญที่คุณต้องการ กรุณาลองใหม่อีกครั้ง \n`)
@@ -251,16 +250,10 @@ cron.schedule('0 */60 * * * * ', function () {
             const id = snap.val().telegram_id
             if(select_coin === 'HYDRO') {
                 getHydro().then(data => {
-                    let price_btc= data.data.ticker.price
-                    let percent_change_24h = data.data.ticker.change
-                    let symbol = data.data.ticker.base
-                    let target = data.data.ticker.target
-                    bot.sendMessage(id, `🔔 ${symbol} 🔔\n\n ${symbol}/${target} = ${price_btc.toLocaleString()} \n Change(24) = ${percent_change_24h}%`).then(() => {
-                        console.log('success')
-                    })
-                    .catch(() => {
-                        return false;
-                    })
+                    let price_usd = data.data.data.quotes.USD.price
+                    let price_btc= data.data.data.quotes.BTC.price.toFixed(8)
+                    let percent_change_24h = data.data.data.quotes.BTC.percent_change_24h
+                    bot.sendMessage(id, `🔔 Rank. ${data.data.data.rank} ${data.data.data.symbol} (${data.data.data.name}) 🔔 \n\n BTC = ${price_btc} \n USD = ${price_usd} \n Change(24) = ${percent_change_24h}%`)
                 }).catch(() => {
                     console.log('not found')
                 })
