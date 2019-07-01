@@ -1,5 +1,6 @@
 // telegram token
 const token = ''
+// firebase config
 const config = {
     apiKey: "",
     authDomain: "",
